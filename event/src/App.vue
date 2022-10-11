@@ -3,8 +3,12 @@
 </template>
 
 <script>
+import {registerAPI} from '@/api/index'
 export default {
-
+  async created(){
+    const {data:res} = await registerAPI()
+    console.log(res);
+  }
 }
 </script>
 
