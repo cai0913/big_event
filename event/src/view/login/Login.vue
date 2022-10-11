@@ -1,10 +1,12 @@
 <template>
-  <!-- 一级挂载点 -->
-  <router-view></router-view>
+  <div>
+    <h1>11111</h1>
+  </div>
 </template>
 
 <script>
 export default {
+
 }
 </script>
 
