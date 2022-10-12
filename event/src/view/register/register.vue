@@ -18,7 +18,7 @@
                 <el-form-item>
                     <el-button type="primary" class="btn-reg" @click="registerFn">注册</el-button>
                     <el-button type="info" class="btn-reg" @click="resetFn">重置</el-button>
-                    <el-link type="info">去登录</el-link>
+                    <el-link type="info" @click="$router.push('/log')">去登录</el-link>
                 </el-form-item>
             </el-form>
         </div>

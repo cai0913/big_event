@@ -1,21 +1,31 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
 import '../assets/global.less'
-import { Button, Form, FormItem, Input, Link, Message } from 'element-ui'
+import { Aside, Button, Container, Footer, Form, FormItem, Header, Input, Link, Main, Menu, MenuItem, Message, Submenu } from 'element-ui'
 import 'element-ui/lib/theme-chalk/index.css';
 import register from '../view/register/register.vue'
 import login from '../view/login/Login.vue'
+import layout from '../view/layout/index.vue'
 Vue.use(VueRouter)
 Vue.use(Button)
 Vue.use(Form)
 Vue.use(FormItem)
 Vue.use(Input)
 Vue.use(Link)
+Vue.use(Container)
+Vue.use(Header)
+Vue.use(Menu)
+Vue.use(Submenu)
+Vue.use(MenuItem)
+Vue.use(Aside)
+Vue.use(Main)
+Vue.use(Footer)
 Vue.prototype.$message = Message
 
 const routes = [{
         path: '/',
-        redirect: '/log'
+        component: layout,
+        name: 'layout'
     },
     {
         path: '/reg',
