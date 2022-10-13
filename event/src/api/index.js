@@ -1,6 +1,7 @@
 // 封装的是具体的接口请求方法
 // 注意：每个方法只负责请求一个url地址
 import request from '../utils/request' //引入自定义axios函数
+import store from '../store/index'
 
 
 // 导出接口方法，为了在逻辑页面引入后调用
@@ -30,6 +31,18 @@ export const loginAPI = ({ username, password }) => {
         data: {
             username,
             password
+        }
+    })
+}
+
+export const getUserInfoAPI = ({}) => {
+    return request({
+        url: '/my/userinfo',
+        // method默认不写就是get方式请求
+        method: 'PUT',
+        // 传参给后台：params（查询字符串query），data（请求体），headers（请求头）
+        headers: {
+            Authorization: store.state.token
         }
     })
 }
