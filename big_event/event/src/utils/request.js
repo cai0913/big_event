@@ -1,5 +1,7 @@
 import axios from 'axios'
 import store from '@/store/index'
+import router from '@/router'
+import { Message } from 'element-ui'
 // 创建一个自定的axios方法(比原axios多了个基地址)
 // axios函数请求的url地址前面会被拼接基地址, 然后axios请求baseURL+url后台完整地址
 const myAxios = axios.create({
@@ -9,7 +11,6 @@ const myAxios = axios.create({
 // 请求拦截器
 // api里每次调用request都会先走这个请求拦截器
 myAxios.interceptors.request.use(function(config) {
-    console.log(config);
     // 判断，登录页面和注册页面，vuex里无token，而且登录接口和注册接口也不需要携带token（其他页面需要）
     if (store.state.token) {
         config.headers.Authorization = store.state.token
@@ -32,6 +33,26 @@ myAxios.interceptors.request.use(function(config) {
          *  reject(error)
          * })
          */
+})
+
+// 相应拦截器
+myAxios.interceptors.response.use(function(response) {
+    // 响应状态码为2xx或3xx时触发成功的回调，形参中的response是“成功的结果”
+    // return到axios原地Promise对象，作为成功的结果
+    return response
+}, function(error) {
+    // 响应状态码为4xx，5xx时触发失败的回调，形参中的error是“失败的回调”
+    // return到axios原地Promise对象位置，作为失败拒绝的状态（如果那边用try+catch或者catch函数捕获，可以捕获到我们传递过去的这个error变量的值）
+    if (error.response.status === 401) {
+        // 本次响应是token过期了
+        // 清除vuex里一切，然后切换回登录页面（被动退出登录状态）
+        store.commit('updateToken', '')
+        store.commit('updateUserInfo', {})
+
+        router.push('/login')
+        Message.error('用户身份已过期，请重新登录！')
+    }
+    return Promise.reject(error)
 })
 
 
