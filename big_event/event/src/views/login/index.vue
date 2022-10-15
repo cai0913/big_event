@@ -31,8 +31,8 @@
 </template>
 
 <script>
-import {loginAPI} from '../../api/index'
-import {mapMutations} from 'vuex'
+import { loginAPI } from '@/api'
+import { mapMutations } from 'vuex'
 export default {
   name: 'my-login',
   data () {
@@ -55,27 +55,22 @@ export default {
       }
     }
   },
-  methods:{
+  methods: {
     ...mapMutations(['updateToken']),
-    loginFn(){
-      this.$refs.loginRef.validate(async valid=>{
-        if(valid){
-          // 拿到后台真正的数据赋予给res
-          const {data:res} = await loginAPI(this.loginForm)
-          // 根据后台返回的登录提示信息，做判断给用户提示
-          // 这里直接用后台提示的message值
-          if(res.code!==0) {
-            this.$message.error(res.message)
-            // 提交给mutation把token字符串保存到vuex
-            this.updateToken(res.token)
-          }else{
-            this.$message.success(res.message)
-            this.$router.push('/')
-          }
-        }
-        else{
-          return false
-        }
+    // 登录按钮->点击事件
+    async loginFn () {
+      this.$refs.loginRef.validate(async valid => {
+        if (!valid) return
+        // 1. 发起登录的请求
+        const { data: res } = await loginAPI(this.loginForm)
+        // 2. 登录失败
+        if (res.code !== 0) return this.$message.error(res.message)
+        // 3. 登录成功
+        this.$message.success(res.message)
+        // 4. 保存到vuex中
+        this.updateToken(res.token)
+        // 登录成功之后，跳转到后台主页
+        this.$router.push('/')
       })
     }
   }

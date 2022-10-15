@@ -1,10 +1,10 @@
 <template>
-  <!-- 一级挂载点 -->
   <router-view></router-view>
 </template>
 
 <script>
 export default {
+  name:'App',
 }
 </script>
 
