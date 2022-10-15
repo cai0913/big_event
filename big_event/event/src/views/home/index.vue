@@ -47,9 +47,41 @@
   </template>
   
   <script>
-  
+  //echarts内部调用的是命名导出export const 变量名 多个
+  //正常导入 import{变量名，变量名} from 'echarts' 得一个个导出来
+  //目的：但是现在想导入所有，形成一个对象使用
+  //语法：import * as 随便变量名 from '包名'  
+  import * as echarts from 'echarts'
   export default {
-    name: 'my-home'
+    name: 'my-home',
+    mounted(){
+        this.initCurveFn()
+    },
+    methods:{
+        // 初始化面积图
+        initCurveFn(){
+            // 基于准备好的dom，初始化echarts实例
+            var myChart = echarts.init(document.getElementById('curve_show'));
+            // 绘制图表
+                myChart.setOption({
+                title: {
+                    text: 'ECharts 入门示例'
+                },
+                tooltip: {},
+                xAxis: {
+                    data: ['衬衫', '羊毛衫', '雪纺衫', '裤子', '高跟鞋', '袜子']
+                },
+                yAxis: {},
+                series: [
+                    {
+                    name: '销量',
+                    type: 'bar',
+                    data: [5, 20, 36, 10, 10, 20]
+                    }
+                ]
+                });
+                        }
+    }
   }
   </script>
   
