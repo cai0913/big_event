@@ -23,6 +23,11 @@ const routes = [{
                     import ('@/views/user/userInfo.vue'),
             },
             {
+                path: 'user-avatar',
+                component: () =>
+                    import ('@/views/user/userAvatar.vue')
+            },
+            {
                 path: 'art-cate', // 文章分类
                 component: () =>
                     import ('@/views/article/artCate.vue'),
