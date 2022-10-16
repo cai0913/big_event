@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import '@/assets/global.less'
-import store from '@/store/index'
+import store from '@/store'
+import '@/assets/global.css'
 Vue.use(VueRouter)
 
 const routes = [{
@@ -15,7 +15,17 @@ const routes = [{
             {
                 path: 'home',
                 component: () =>
-                    import ('@/views/home')
+                    import ('@/views/home'),
+            },
+            {
+                path: 'user-info', // 这里必须叫user-info, 因为侧边栏导航切换的是它
+                component: () =>
+                    import ('@/views/user/userInfo.vue'),
+            },
+            {
+                path: 'art-cate', // 文章分类
+                component: () =>
+                    import ('@/views/article/artCate.vue'),
             }
         ]
     },
@@ -32,7 +42,7 @@ const routes = [{
 ]
 
 const router = new VueRouter({
-    routes
+    routes,
 })
 
 

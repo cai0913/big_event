@@ -47,12 +47,13 @@
             如果无嵌套，直接写el-menu-item
           -->
         <el-menu
-          default-active="/home"
+          :default-active="$route.path"
           class="el-menu-vertical-demo"
           background-color="#23262E"
           text-color="#fff"
           active-text-color="#409EFF"
           unique-opened
+          router
         >
         <template v-for="item in menus">
           <!-- 不包含子菜单的“一级菜单” -->
@@ -78,7 +79,7 @@
           <!-- 页面主体区域 -->
           <el-main>
             <!-- 二级路由的挂载点 -->
-            <router-view></router-view>
+            <router-view :key="key"></router-view>
           </el-main>
           <!-- 底部 footer 区域 -->
           <el-footer>© www.itheima.com - 黑马程序员</el-footer>
@@ -98,7 +99,10 @@
       }
     },
     computed:{
-      ...mapGetters(['nickname', 'username', 'user_pic'])
+      ...mapGetters(['nickname', 'username', 'user_pic']),
+      key(){
+        return this.$route.path+Math.random()
+      }
     },
     created(){
       //请求侧边栏的数据
