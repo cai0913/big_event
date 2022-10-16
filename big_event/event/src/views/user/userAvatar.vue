@@ -11,12 +11,14 @@
   <div class="btn-box">
     <input type="file" accept="image/*" style="display: none" ref="iptRef" @change="onFileChange" />
         <el-button type="primary" icon="el-icon-plus" @click="chooseImg">选择图片</el-button>
-        <el-button type="success" icon="el-icon-upload" :disabled="avatar === ''">上传头像</el-button>
+        <el-button type="success" icon="el-icon-upload" :disabled="avatar === ''"
+        @click="updateFn">上传头像</el-button>
   </div>
 </el-card>
 </template>
 
 <script>
+import {updateUserAvatarAPI} from '@/api'
 export default {
     name:'UserAvatar',
     data(){
@@ -34,13 +36,13 @@ export default {
         },
         // 选择图片，确定了
         onFileChange(e){//e原生的事件对象
-            let files = e.target.files //拿到用户选择的文件数组
+            const files = e.target.files //拿到用户选择的文件数组
             if(files.length === 0){
                 // 证明刚刚文件选择窗口打开了，但是一个文件都没有选择，就点击了确定关闭了选择弹窗
                 this.avatar = ''
             }else{
                 // 证明它选择了文件（默认只能选1个，如果选择多个你需要给input标签加额外的原生属性）
-                console.log(files[0]);
+
 
                 // 目标：选择图片文件，要给img标签上做纯前端的预览
                 // img标签的src值
@@ -62,6 +64,15 @@ export default {
                 }
 
             }
+        },
+        // 开始上传头像
+        async updateFn(){
+            const res = await updateUserAvatarAPI(this.avatar)
+            if(res.status!==200) return this.$message.error('更新头像失败！')
+            // 更新头像成功
+            this.$message.success('更新头像成功！')
+            // 立刻让vuex里actions（获取用户信息的actions）在请求一次后台更新vuex里的值
+            this.$store.dispatch('initUserInfo')
         }
     }
 
