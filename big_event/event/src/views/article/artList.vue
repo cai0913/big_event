@@ -10,8 +10,7 @@
                 <el-form :inline="true" :model="q">
                 <el-form-item label="文章列表">
                     <el-select v-model="q.cate_id" placeholder="请选择分类" size="small">
-                        <el-option label="区域一" value="shanghai"></el-option>
-                        <el-option label="区域二" value="beijing"></el-option>
+                        <el-option v-for="obj in cateList" :key="obj.id" :label="obj.cate_name" :value="obj.cate_id"></el-option>
                     </el-select>
                 </el-form-item>
                 <el-form-item label="发布状态" style="margin-left: 15px;">
@@ -31,12 +30,29 @@
 
         <!-- 发表文章的 Dialog 对话框 -->
         <el-dialog title="发表文章" :visible.sync="pubDialogVisible" fullscreen :before-close="handleClose">
-        <span>这是一段信息</span>
+            <!-- 发布文章的对话框 -->
+        <el-form :model="pubForm" :rules="pubFormRules" ref="pubFormRef" label-width="100px">
+            <el-form-item label="文章标题" prop="title">
+                <el-input v-model="pubForm.title" placeholder="请输入标题"></el-input>
+            </el-form-item>
+            <el-form-item label="文章分类" prop="cate_id">
+                <el-select v-model="pubForm.cate_id" placeholder="请选择分类" style="width: 100%;">
+                    <!-- 因为整个表单要发给后台，去提前看眼vue代码里绑定的值需要什么，发现接口文档里需要分类的id -->
+                    <el-option v-for="obj in cateList" :key="obj.id" :label="obj.cate_name" :value="obj.cate_id"></el-option>
+                </el-select>
+            </el-form-item>
+            <el-form-item label="文章内容" prop="content">
+                <quill-editor v-model="pubForm.content">
+                    
+                </quill-editor>
+            </el-form-item>
+        </el-form>
         </el-dialog>
     </div>
 </template>
 
 <script>
+import {getArtCateListAPI} from '@/api'
 export default {
     name:'ArtList',
     data(){
@@ -47,8 +63,30 @@ export default {
                 cate_id:'',
                 state:''
             },
-            pubDialogVisible:false //控制发布文章对话框出现/隐藏(true/false)
+            pubDialogVisible:false, //控制发布文章对话框出现/隐藏(true/false)
+            pubForm:{ //表单的数据对象
+                title:'', //文章标题
+                cate_id:'', //文章分类id
+                content:'' //文章内容
+            },
+            pubFormRules:{//验证规则对象
+                title:[
+                    {required:true,message:'请输入文章标题',triggle:'blur'},
+                    {min:1,max:30,message:'文章标题的长度为1~30个字符',triggle:'blur'}
+                ],
+                cate_id:[
+                    {required:true,message:'请选择文章标题',triggle:'blur'}
+                ],
+                content:[
+                    {required:true,message:'',triggle:'blur'}
+                ]
+            },
+            cateList:[] //保存文章分类列表
         }
+    },
+    created(){
+        // 请求分类数据
+        this.getCateFn()
     },
     methods:{
         // 发表文章按钮点击事件->让对话框出现
@@ -79,6 +117,11 @@ export default {
             // 确认关闭
             done()
         },
+        // 获取所有的分类
+        async getCateFn(){
+            const {data:res} = await getArtCateListAPI()
+            this.cateList = res.data
+        }
 
     }
 }
@@ -92,5 +135,13 @@ export default {
   .btn-pub {
     margin-top: 5px;
   }
+}
+
+// 设置富文本编辑器的默认最小高度
+// ::v-deep作用: 穿透选择, 正常style上加了scope的话, 会给.ql-editor[data-v-hash]属性, 只能选择当前页面标签或者组件的根标签
+// 如果想要选择组件内的标签(那些标签没有data-v-hash值)所以正常选择选不中, 加了::v-deep空格前置的话, 选择器就会变成如下形式
+// [data-v-hash] .ql-editor 这样就能选中组件内的标签的class类名了
+::v-deep .ql-editor {
+  min-height: 300px;
 }
 </style>
