@@ -135,3 +135,20 @@ export const addArtCateAPI = ({ cate_name, cate_alias }) => {
         }
     })
 }
+
+/**
+ * 更新文章分类
+ * @param {*} param0 ｛id：文章分类id，cate_name:分类名称，cate_alias:分类别名｝ 
+ * @returns Promise对象
+ */
+export const updateArtCateAPI = ({ id, cate_name, cate_alias }) => {
+    return request({
+        url: '/my/cate/info',
+        method: 'PUT',
+        data: {
+            id,
+            cate_name,
+            cate_alias
+        }
+    })
+}

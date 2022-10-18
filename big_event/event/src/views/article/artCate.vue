@@ -22,7 +22,7 @@
       </el-table>
       </el-card>
       <!-- 添加文章分类的对话框 -->
-      <el-dialog title="添加文章分类" :visible.sync="dialogFormVisible" width="30%" @close="dialogCloseFn">
+      <el-dialog :title="isEdit ? '编辑文章分类':'添加文章分类'" :visible.sync="dialogFormVisible" width="30%" @close="dialogCloseFn">
         <el-form :model="addForm" :rules="addRules" ref="addRef" label-width="80px">
           <el-form-item label="分类名称" prop="cate_name">
             <el-input v-model="addForm.cate_name"></el-input>
@@ -35,13 +35,18 @@
     <el-button @click="concelFn">取 消</el-button>
     <el-button type="primary" @click="confirmFn">确 定</el-button>
   </div>
-</el-dialog>
+      </el-dialog>
 
     </div>
   </template>
   
   <script>
-  import {getArtCateListAPI,addArtCateAPI} from '@/api'
+  // 经验：如果用同一个按钮，想要做状态区分
+  // 1.定义一个标记变量isEdit（true编辑，false新增），还要定义本次要编辑的数据唯一id值，editId
+  // 2.在点击修改时，isEdit改为true，editId保存要修改的数据id
+  // 3.在点击新增按钮时，isEdit改为false，editId置空
+  // 4.在点击保存按钮时（确定按钮时），就可以用isEdit变量区分了
+  import {getArtCateListAPI,addArtCateAPI,updateArtCateAPI} from '@/api'
   export default {
     name: 'ArtCate',
     data(){
@@ -61,7 +66,9 @@
             {required:true,message:'请输入分类别名',triggle:'blur'},
             {min:1,max:15,pattern:/^[a-zA-Z0-9]{1,15}$/,message:'分类别名必须是1~15位的字母数字',triggle:'blur'}
           ]
-        }
+        },
+        isEdit:false, //true为编辑状态，false为新增状态
+        editId:'' //保存正在要编辑的数据id值
       }
     },
     methods:{
@@ -71,11 +78,13 @@
         const res = await getArtCateListAPI()
         this.cateList = res.data.data
       },
-      // 添加分类按钮点击事件->为了让对话框出现
+      // // 添加分类按钮点击事件->为了让对话框出现
       addCateShowDialogFn(){
+        this.isEdit = false //变回新增状态标记
+        this.editId = ''
         this.dialogFormVisible = true
       },
-      // 对话框取消按钮->点击事件
+      // // 对话框取消按钮->点击事件
       concelFn(){
         this.dialogFormVisible = false
       },
@@ -83,32 +92,48 @@
        confirmFn(){
         this.$refs.addRef.validate(async valid => {
           if(valid){
-            const {data:res} = await addArtCateAPI(this.addForm)
-            if(res.code!==0) return this.$message.error(res.message)
-            this.$message.success(res.message)
+            // 通过校验
+            if(this.editId){
+              // 要修改
+              this.addForm.id = this.editId //把要编辑的文章分类id添加到对象身上
+              // const {data:res} = await updateArtCateAPI(this.addForm)
+              // 把this.editId添加到新对象形成新属性id,再结构addForm获取到其中的属性也添加到该新对象上
+              const {data:res} = await updateArtCateAPI({id:this.editId, ...this.addForm})
+              if(res.code!==0) return this.$message.error(res.message)
+              this.$message.success(res.message)
+            }else{
+              // 要新增
+              const {data:res} = await addArtCateAPI(this.addForm)
+              if(res.code!==0) return this.$message.error(res.message)
+              this.$message.success(res.message)
+            }
             this.getArtCateFn()
+            this.dialogFormVisible = false
           }else{
             return false
           }
         })
-        this.dialogFormVisible = false
       },
       // 对话框-关闭时的回调
       dialogCloseFn(){
         this.$refs.addRef.resetFields()
       },
-      // 修改分类按钮->点击事件(先做数据的回显)
+    //   // 修改分类按钮->点击事件(先做数据的回显)
       updateCateBtnFn(obj){
         // obj的值：｛id：文章分类id，cate_name：文章分类名字，cate_alias：文章分类别名｝
+        this.isEdit = true
+        this.editId = obj.id
         this.dialogFormVisible = true
-        // 数据回显（回填）
-        this.addForm.cate_name = obj.cate_name
-        this.addForm.cate_alias = obj.cate_alias
-      }
+        this.$nextTick(()=>{
+            // 先让对话框出现, 它绑定空值的对象, 才能resetFields清空用初始空值
+            this.addForm.cate_name = obj.cate_name
+            this.addForm.cate_alias = obj.cate_alias
+        })
     },
-    created(){
-      this.getArtCateFn()
-    }
+  },
+  created(){
+        this.getArtCateFn()
+      },
 
   }
   </script>
