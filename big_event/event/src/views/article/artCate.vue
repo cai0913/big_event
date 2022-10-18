@@ -16,7 +16,7 @@
           <!-- scope对象：｛row：行对象｝ -->
           <template v-slot="scope">
             <el-button type="primary" size="mini" @click="updateCateBtnFn(scope.row)">修改</el-button>
-            <el-button type="danger" size="mini">删除</el-button>
+            <el-button type="danger" size="mini" @click="delCateFn(scope.row)">删除</el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -40,13 +40,14 @@
     </div>
   </template>
   
+  
   <script>
   // 经验：如果用同一个按钮，想要做状态区分
   // 1.定义一个标记变量isEdit（true编辑，false新增），还要定义本次要编辑的数据唯一id值，editId
   // 2.在点击修改时，isEdit改为true，editId保存要修改的数据id
   // 3.在点击新增按钮时，isEdit改为false，editId置空
   // 4.在点击保存按钮时（确定按钮时），就可以用isEdit变量区分了
-  import {getArtCateListAPI,addArtCateAPI,updateArtCateAPI} from '@/api'
+  import {getArtCateListAPI,addArtCateAPI,updateArtCateAPI,deleteArtCateAPI} from '@/api'
   export default {
     name: 'ArtCate',
     data(){
@@ -124,18 +125,45 @@
         this.isEdit = true
         this.editId = obj.id
         this.dialogFormVisible = true
+
+        // 让el-dialog第一次挂载el-form时，先用addForm空字符串初始值绑定到内部，后续用作resetFields重置
+        // 所以让真实DOM先创建并在内部绑定好“复制”好的初始值
+
+        // 接着我们真实DOM更新后绑定好了，咱们再给数据回显
+        // 注意：我们给v-model对象赋值只是影响当前显示的值，不会影响到resetFields复制的初始值
         this.$nextTick(()=>{
-            // 先让对话框出现, 它绑定空值的对象, 才能resetFields清空用初始空值
+            // 数据回显（回填）
             this.addForm.cate_name = obj.cate_name
             this.addForm.cate_alias = obj.cate_alias
         })
     },
+    // 删除分类按钮->点击事件
+    async delCateFn(obj){
+      // obj:{id,cate_name,cate_alias}
+      const {data:res} = await deleteArtCateAPI(obj.id)
+      if(res.code!==0) return this.$message.error(res.message)
+      this.$message.success(res.message)
+      // 删除后，再调用方法去后台获取最新的数据列表
+      this.getArtCateFn()
+    }
   },
   created(){
         this.getArtCateFn()
       },
 
   }
+
+  // 小bug：（el-form和el-dialog和数据回显 同时用，有bug）
+  // 复现：第一次打开网页，先点击修改，再点击新增，发现输入框竟然有值
+  // 原因：点击修改后，关闭对话框时，置空失效了
+  // 具体分析：主人公resetFields()有问题
+  // 线索：dialog的内容是懒渲染的，即在第一次被打开前，传入的默认slot不会被渲染到dom上，第二次后续只是做css隐藏和显示
+  // 线索：vue数据改变（先执行同步所有）再去更新DOM（异步代码）
+  // 无问题：第一次打开网页，先点击新增按钮 -> dialog出现 -> el-form组件第一次挂载（关联的addForm对象的属性的值为空字符串） el-form组件内绑定了初始值，所以后续调用resetFields的时候，他可以用到空字符串初始值来重置
+
+  // 有问题：第一次打开网页，先点击修改按钮 -> 虽然dialog变量为true了但是同步代码把addForm对象里赋值了（默认值）-> DOM更新异步 -> dialog出现 -> el-form组件第一次挂载(使用addForm内置做回显然后第一次el-form内绑定了初始值（有值）) -> 以后做重置，他就用绑定的带值的做重置
+  
+  // 解决
   </script>
   
   <style lang="less" scoped>
