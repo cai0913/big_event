@@ -163,7 +163,7 @@
 
   // 有问题：第一次打开网页，先点击修改按钮 -> 虽然dialog变量为true了但是同步代码把addForm对象里赋值了（默认值）-> DOM更新异步 -> dialog出现 -> el-form组件第一次挂载(使用addForm内置做回显然后第一次el-form内绑定了初始值（有值）) -> 以后做重置，他就用绑定的带值的做重置
   
-  // 解决
+  // 解决：通过调用$nexttick方法，让el-form组件在DOM更新完成后绑定addForm无值时作为初始值，这样就解决这个小bug了
   </script>
   
   <style lang="less" scoped>
