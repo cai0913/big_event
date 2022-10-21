@@ -168,3 +168,33 @@ export const deleteArtCateAPI = (id) => {
         }
     })
 }
+
+/**
+ * 发表文章
+ * @param {*} fd FormDate 表单数据对象 
+ * @returns Promise对象
+ */
+export const uploadArticleAPI = (fd) => {
+    return request({
+        url: '/my/article/add',
+        method: 'POST',
+        data: fd // 参数要的是表单对象, 不能写普通对象, axios内部会判断, 如果是表单对象, 传递的请求体会设置Content-Type: form-data与后端对应
+    })
+}
+
+/**
+ * 获取文章列表
+ * @param {*} param0 pagenum当前页码, pagesize当前需要的数据条数, cate_id文章分类, state文章状态
+ * @returns Promise对象
+ */
+export const getArtListAPI = ({ pagenum, pagesize, cate_id, state }) => {
+    return request({
+        url: '/my/article/list',
+        params: {
+            pagenum,
+            pagesize,
+            cate_id,
+            state,
+        }
+    })
+}
