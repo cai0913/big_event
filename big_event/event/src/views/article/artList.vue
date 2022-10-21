@@ -30,7 +30,11 @@
             <!-- 文章表格区域 -->
             <!-- 文章表格区域 -->
             <el-table :data="artList" style="width: 100%;" border stripe>
-                <el-table-column label="文章标题" prop="title"></el-table-column>
+                <el-table-column label="文章标题" prop="title">
+                    <template v-slot="scope">
+                        <el-link type="primary" @click="showDetailFn(scope.row.id)">{{scope.row.title}}</el-link>
+                    </template>
+                </el-table-column>
                 <el-table-column label="分类" prop="cate_name"></el-table-column>
                 <el-table-column label="发表时间" prop="pub_date">
                     <template v-slot="scope">
@@ -85,11 +89,34 @@
             </el-form-item>
         </el-form>
         </el-dialog>
+
+        <!-- 查看文章详情的对话框 -->
+        <!-- 查看文章详情的对话框 -->
+        <el-dialog title="文章预览" :visible.sync="detailVisible" width="80%">
+        <h1 class="title">{{artDetail.title}}</h1>
+
+        <div class="info">
+            <span>作者：{{artDetail.nickname || artDetail.username}}</span>
+            <span>发布时间：{{$formatDate(artDetail.pub_date)}}</span>
+            <span>所属分类：{{artDetail.cate_name}}</span>
+            <span>状态：{{artDetail.state}}</span>
+        </div>
+            
+        <!-- 分割线 -->
+        <el-divider></el-divider>
+        
+        <!-- 文章的封面 -->
+        <img v-if="artDetail.cover_img" :src="'http://big-event-vue-api-t.itheima.net' + artDetail.cover_img" alt="" />
+        
+        <!-- 文章的详情 -->
+        <div v-html="artDetail.content" class="detail-box"></div>
+        <!-- 如果用{{}}的话，里面传的内容会被当成字符串显示，若带标签要加上v-html="值",值要写了双引号里面，这样传的内容就会原封不动的解析了 -->
+        </el-dialog>
     </div>
 </template>
 
 <script>
-import {getArtCateListAPI,uploadArticleAPI,getArtListAPI} from '@/api'
+import {getArtCateListAPI,uploadArticleAPI,getArtListAPI,getArtDetailAPI} from '@/api'
 // 标签和样式中，引入图片文件直接写“静态路径”（把路径放在js的vue变量里再赋予是不行的）
 // 原因：webpack分析标签时，如果src的值是一个相对路径，他会去帮我们找到哪个路径的文件并一起打包，打包时，会分析文件的大小，小图转成base64字符串再赋予给src，如果是大图拷贝图片换个路径给img的src显示（运行中）
 
@@ -144,6 +171,8 @@ export default {
             cateList:[], //保存文章分类列表
             artList:[], //保存文章列表
             total:0, //保存文章总数
+            detailVisible: false, //用于查看文章详情的对话框（显示/隐藏）
+            artDetail:{} //文章详情
         }
     },
     created(){
@@ -285,6 +314,14 @@ export default {
             this.q.cate_id = ''
             this.q.state = '' //对象改变，v-model关联的表单标签也会改变
             this.getArtListFn()
+        },
+        // 文章标题点击事件->为了查看详情
+        async showDetailFn(artId){
+            this.detailVisible = true //让详情的对话框出现
+            // artId：文章id值
+            const {data:res} = await getArtDetailAPI(artId)
+            this.artDetail = res.data
+
         }
 
     }
@@ -335,4 +372,26 @@ export default {
 }
 
 // 总结：scoped不会给组件内标签添加data-v属性，所以要用::v-deep穿透选择组件内标签设置样式
+
+.title {
+  font-size: 24px;
+  text-align: center;
+  font-weight: normal;
+  color: #000;
+  margin: 0 0 10px 0;
+}
+
+.info {
+  font-size: 12px;
+  span {
+    margin-right: 20px;
+  }
+}
+
+// 修改 dialog 内部元素的样式，需要添加样式穿透
+::v-deep .detail-box {
+  img {
+    width: 500px;
+  }
+}
 </style>
