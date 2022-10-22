@@ -106,7 +106,7 @@
         <el-divider></el-divider>
         
         <!-- 文章的封面 -->
-        <img v-if="artDetail.cover_img" :src="'http://big-event-vue-api-t.itheima.net' + artDetail.cover_img" alt="" />
+        <img v-if="artDetail.cover_img" :src="baseURLR + artDetail.cover_img" alt="" />
         
         <!-- 文章的详情 -->
         <div v-html="artDetail.content" class="detail-box"></div>
@@ -116,6 +116,7 @@
 </template>
 
 <script>
+import {baseURL} from '@/utils/request'
 import {getArtCateListAPI,uploadArticleAPI,getArtListAPI,getArtDetailAPI} from '@/api'
 // 标签和样式中，引入图片文件直接写“静态路径”（把路径放在js的vue变量里再赋予是不行的）
 // 原因：webpack分析标签时，如果src的值是一个相对路径，他会去帮我们找到哪个路径的文件并一起打包，打包时，会分析文件的大小，小图转成base64字符串再赋予给src，如果是大图拷贝图片换个路径给img的src显示（运行中）
@@ -131,6 +132,7 @@ export default {
     name:'ArtList',
     data(){
         return{
+            baseURLR:baseURL,
             q:{
                 pagenum:1, //默认拿第一页的数据
                 pagesize:2, //默认当前页面需要几条数据（传递给后台，后台就返回几个数据）

@@ -2,10 +2,12 @@ import axios from 'axios'
 import store from '@/store/index'
 import router from '@/router'
 import { Message } from 'element-ui'
-// 创建一个自定的axios方法(比原axios多了个基地址)
-// axios函数请求的url地址前面会被拼接基地址, 然后axios请求baseURL+url后台完整地址
+
+export const baseURL = 'http://big-event-vue-api-t.itheima.net' //接口和图片资源所在的服务器地址
+    // 创建一个自定的axios方法(比原axios多了个基地址)
+    // axios函数请求的url地址前面会被拼接基地址, 然后axios请求baseURL+url后台完整地址
 const myAxios = axios.create({
-    baseURL: 'http://big-event-vue-api-t.itheima.net'
+    baseURL: baseURL
 })
 
 
