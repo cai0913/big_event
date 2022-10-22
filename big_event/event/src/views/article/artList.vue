@@ -42,7 +42,11 @@
                     </template>
                 </el-table-column>
                 <el-table-column label="状态" prop="state"></el-table-column>
-                <el-table-column label="操作"></el-table-column>
+                <el-table-column label="操作">
+                    <template v-slot="{row}">
+                        <el-button type="danger" size="mini" @click="removeFn(row.id)">删除</el-button>
+                    </template>
+                </el-table-column>
             </el-table>
 
             <!-- 分页区域 -->
@@ -117,7 +121,7 @@
 
 <script>
 import {baseURL} from '@/utils/request'
-import {getArtCateListAPI,uploadArticleAPI,getArtListAPI,getArtDetailAPI} from '@/api'
+import {getArtCateListAPI,uploadArticleAPI,getArtListAPI,getArtDetailAPI,delArticleAPI} from '@/api'
 // 标签和样式中，引入图片文件直接写“静态路径”（把路径放在js的vue变量里再赋予是不行的）
 // 原因：webpack分析标签时，如果src的值是一个相对路径，他会去帮我们找到哪个路径的文件并一起打包，打包时，会分析文件的大小，小图转成base64字符串再赋予给src，如果是大图拷贝图片换个路径给img的src显示（运行中）
 
@@ -324,6 +328,30 @@ export default {
             const {data:res} = await getArtDetailAPI(artId)
             this.artDetail = res.data
 
+        },
+        // 删除文章按钮的点击事件
+        async removeFn(artId){
+            const {data:res} = await delArticleAPI(artId)
+            if(res.code!==0) return this.$message.error(res.message)
+            this.$message.success(res.message)
+
+            // 数组里只保存当前页的数据，别的页的需要传参q给后台获取覆盖
+            // 1的原因：虽然你调用删除接口但是那是后端删除，前端数组里没有代码去修改它
+            if(this.artList.length===1) {
+                if(this.q.pagenum>1){ //保证pagenum最小值为1
+                    this.q.pagenum--
+                }
+            }
+
+            // 把分页和筛选条件重置，让表格的数据重新请求一次
+            // this.resetFn()
+            // 或：
+            // 直接携带当前q里有的参数，重新去后台获取一次最新的数据列表
+            this.getArtListFn()
+
+            // 问题：在最后一页，删除最后一条时，虽然页码能回到上一页，但是数据没有出现
+            // 原因：发现network里参数q.pagenum的值不会自己回到上一页，因为代码里没有修改过这个q.pagenum的值，只是调用getArtListFn方法，带着之前的参数请求去了所以没有数据
+            // 解决： 在调用接口以后，刷新数组列表之前，对页码做一下处理
         }
 
     }
